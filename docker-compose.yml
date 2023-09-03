@@ -1,11 +1,12 @@
 version: "3.9"
 services:
+
   wordpress:
     image: wordpress:${WORDPRESS_VERSION:-php7.4-fpm}
-    container_name: wordpress
+    container_name: wordpress-wordpress
     depends_on:
       - mysql
-    enviroment:
+    environment:
       - WORDPRESS_TABLE_PREFIX=${WORDPRESS_TABLE_PREFIX:-wp_}
       - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME:-wordpress}
       - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST:-mysql}
@@ -20,7 +21,7 @@ services:
 
   mysql:
     image: mysql:${MYSQL_VERSION:-latest}
-    container_name: mysql
+    container_name: wordpress-mysql
     volumes:
       - ${MYSQL_DIR:-./core/mysql}:/var/lib/mysql
     environment:
@@ -29,6 +30,7 @@ services:
       - MYSQL_USER=${MYSQL_USER:-root}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
       - MYSQL_ALLOW_EMPTY_PASSWORD=${MYSQL_ALLOW_EMPTY_PASSWORD:-no}
+      - MYSQL_RANDOM_ROOT_PASSWORD=${MYSQL_RANDOM_ROOT_PASSWORD:-1}
     restart: always
     networks:
       - wordpress-network
@@ -39,12 +41,13 @@ services:
       args:
         - NGINX_IMAGE=nginx:${NGINX_VERSION:-latest}
         - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
-    container_name: nginx
+    container_name: wordpress-nginx
     depends_on:
       - wordpress
     ports:
       - "${NGINX_HTTP_PORT:-80}:80"
     volumes:
+      - ${WORDPRESS_DIR:-./core/wordpress}:/var/www/html
       - ${NGINX_LOG_DIR:-./core/logs/nginx}:/var/log/nginx
     restart: always
     networks:
