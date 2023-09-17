@@ -18,6 +18,7 @@ services:
     restart: always
     networks:
       - wordpress-network
+      - youtube-api-external
 
   mysql:
     image: mysql:${MYSQL_VERSION:-latest}
@@ -52,6 +53,7 @@ services:
     restart: always
     networks:
       - wordpress-network
+      - youtube-api-external
 
 volumes:
   mysql:
@@ -60,3 +62,6 @@ volumes:
 networks:
   wordpress-network:
     driver: bridge
+  youtube-api-external:
+    external: true
+    name: youtube-api-external
